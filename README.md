@@ -1,2 +1,2 @@
 demo
-(game.jpg)
+![示例图片](game.jpg)
