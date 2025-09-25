@@ -75,24 +75,28 @@ export class Demo extends Phaser.Scene {
             },
             duration: 100,
             onComplete: () => {
-              bodyA.gameObject.alpha = 0
-              bodyB.gameObject.alpha = 0
-              bodyB.destroy()
-              bodyA.destroy()
+              bodyA.gameObject?.destroy()
+              bodyB.gameObject?.destroy()
               this.createFruit(x, y, false, `${label}`, true)
-              if (label == 11) {
-                const gameOver = this.add.text(512, 384, 'YOU WIN', {
-                  fontFamily: 'Arial Black',
-                  fontSize: window.devicePixelRatio * 10,
-                  color: '#ffffff',
-                  stroke: '#000000',
-                  strokeThickness: 5,
-                  align: 'center'
-                })
-                gameOver.setOrigin(0.5)
-                this.input.once('pointerdown', () => {
-                  this.scene.restart()
-                })
+              if (label === 11) {
+                this.time.delayedCall(300, () => {
+                  const gameOver = this.add.text(
+                    window.innerWidth / 2, 
+                    window.innerHeight / 2, 
+                    'YOU WIN', {
+                    fontFamily: 'Arial Black',
+                    fontSize: 64,
+                    color: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 8,
+                    align: 'center'
+                  })
+                  gameOver.setOrigin(0.5)
+                  this.enableAdd = false;
+                  this.input.once('pointerdown', () => {
+                    this.scene.restart()
+                  })
+                });
               }
             }
           })
