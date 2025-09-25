@@ -22,26 +22,36 @@ export class Demo extends Phaser.Scene {
     const x = window.innerWidth / 2
     const y = window.innerHeight / 10
     let fruit = this.createFruit(x, y)
-    this.input.on('pointermove', (pointer: { x: number | undefined }) => {
-      fruit.setPosition(pointer.x, y);
-    });
-    this.input.on('pointerup', (point: { x: any }) => {
+    this.input.on('pointermove', (pointer: { x: number }) => {
+      const radius = (fruit.width * fruit.scaleX) / 2
+      const clampedX = Phaser.Math.Clamp(
+        pointer.x,
+        radius,
+        window.innerWidth - radius
+      )
+      fruit.setPosition(clampedX, y)
+    })
+    this.input.on('pointerup', (pointer: { x: number }) => {
       if (this.enableAdd) {
         this.enableAdd = false
-        //先x轴上移动到手指按下的点
+        const radius = (fruit.width * fruit.scaleX) / 2
+        const dropX = Phaser.Math.Clamp(
+          pointer.x,
+          radius,
+          window.innerWidth - radius
+        )
         this.tweens.add({
           targets: fruit,
-          x: point.x,
+          x: dropX,
           duration: 100,
           ease: 'Power1',
           onComplete: () => {
             const body = fruit?.body as any
-            this.createFruit(point.x, y, false, body.label)
+            this.createFruit(dropX, y, false, body.label)
             fruit.destroy()
             setTimeout(() => {
               fruit = this.createFruit(x, y)
             }, 1000)
-            // 播完动画才能点击
             setTimeout(() => {
               this.enableAdd = true
             }, 1300)
@@ -73,7 +83,7 @@ export class Demo extends Phaser.Scene {
               bodyB.gameObject.alpha = 0
               bodyB.destroy()
               bodyA.destroy()
-              this.createFruit(x, y, false, `${label}`)
+              this.createFruit(x, y, false, `${label}`, true)
             }
           })
         }
@@ -86,11 +96,9 @@ export class Demo extends Phaser.Scene {
       8,
       'endLine'
     )
-    //设为隐藏
     endLineSprite.setVisible(false)
     this.matter.add.gameObject(endLineSprite, {
       isStatic: true,
-      //传感器模式，可以检测到碰撞，但是不会对物体产品效果
       isSensor: true,
       onCollideCallback: () => {
         if (this.enableAdd) {
@@ -110,8 +118,7 @@ export class Demo extends Phaser.Scene {
       }
     })
   }
-
-  createFruit(x: number, y: number, isStatic = true, key?: string) {
+  createFruit(x: number, y: number, isStatic = true, key?: string, coll?: boolean) {
     key = key || `${Phaser.Math.Between(1, 5)}`
     const fruit = this.matter.add.image(x, y, key)
     fruit.setBody(
@@ -125,13 +132,18 @@ export class Demo extends Phaser.Scene {
       }
     )
     fruit.setBounce(0.2)
-    this.tweens.add({
-      targets: fruit,
-      scaleX: 0.75,
-      scaleY: 0.75,
-      ease: 'Back',
-      duration: 300
-    })
+    if (coll) {
+      fruit.setScale(0.9);
+      this.tweens.add({
+        targets: fruit,
+        scaleX: 0.75,
+        scaleY: 0.75,
+        ease: 'Back',
+        duration: 300
+      })
+    } else {
+      fruit.setScale(0.75);
+    }
     return fruit
   }
 }
