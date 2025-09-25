@@ -5,11 +5,8 @@ export class Demo extends Phaser.Scene {
   constructor() {
     super('demo')
   }
-
   create() {
-    //设置边界
     this.matter.world.setBounds()
-    //添加地面
     const groundSprite = this.add.tileSprite(
       window.innerWidth / 2,
       window.innerHeight - 50 / 2,
@@ -66,7 +63,6 @@ export class Demo extends Phaser.Scene {
         const same = bodyA.label === bodyB.label
         const live = !bodyA.isStatic && !bodyB.isStatic
         if (unfinished && same && live) {
-          // 不加静态会把合成的弹飞
           bodyA.isStatic = true
           bodyB.isStatic = true
           const { x, y } = bodyA.position
@@ -84,6 +80,20 @@ export class Demo extends Phaser.Scene {
               bodyB.destroy()
               bodyA.destroy()
               this.createFruit(x, y, false, `${label}`, true)
+              if (label == 11) {
+                const gameOver = this.add.text(512, 384, 'YOU WIN', {
+                  fontFamily: 'Arial Black',
+                  fontSize: window.devicePixelRatio * 10,
+                  color: '#ffffff',
+                  stroke: '#000000',
+                  strokeThickness: 5,
+                  align: 'center'
+                })
+                gameOver.setOrigin(0.5)
+                this.input.once('pointerdown', () => {
+                  this.scene.restart()
+                })
+              }
             }
           })
         }
@@ -112,7 +122,7 @@ export class Demo extends Phaser.Scene {
           })
           gameOver.setOrigin(0.5)
           this.input.once('pointerdown', () => {
-            location.reload()
+            this.scene.restart()
           })
         }
       }
